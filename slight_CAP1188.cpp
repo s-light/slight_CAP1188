@@ -71,7 +71,6 @@ slight_CAP1188_TWI::slight_CAP1188_TWI(
 
 bool slight_CAP1188_TWI::begin() {
     if (ready == false) {
-
         // set registers to default configuration.
         // takes ~300ms
         sensor_HW_reset();
@@ -90,7 +89,6 @@ bool slight_CAP1188_TWI::begin() {
         // Serial.println();
 
         sensor_default_configuration();
-
     }
     return ready;
 }
@@ -147,9 +145,10 @@ void slight_CAP1188_TWI::sensor_input_status_update() {
     // check if sensor is present
     if (ready) {
         // poll sensor every 90ms
-        // at default configuration this is the cycle time till all sensors are read.
+        // at default configuration
+        // this is the cycle time till all sensors are read.
         uint32_t duration = millis() - timestamp_lastread;
-        if ( duration > update_interval) {
+        if (duration > update_interval) {
             timestamp_lastread =  millis();
 
             sensor_input_status = sensor_input_status_get_raw();
@@ -170,9 +169,8 @@ void slight_CAP1188_TWI::sensor_input_status_update() {
                 //     }
                 // }
                 // Serial.println();
-
             }  // filter for changes
-        } // update_interval
+        }  // update_interval
     }  // if ready
 }
 
@@ -213,7 +211,7 @@ bool slight_CAP1188_TWI::interrupt_get() {
     reg = reg & intterupt_mask;
     // convert to bool
     bool result = false;
-    if(reg > 0) {
+    if (reg > 0) {
         result = true;
     }
     return result;
@@ -298,6 +296,27 @@ uint8_t slight_CAP1188_TWI::sensor_input_status_get_raw() {
 
 uint8_t slight_CAP1188_TWI::sensor_input_status_get() {
     return sensor_input_status;
+}
+
+bool slight_CAP1188_TWI::sensor_input_status_get(uint8_t sensor) {
+    if (sensor > 8) {
+        sensor = 8;
+    }
+    if (sensor < 1) {
+        sensor = 1;
+    }
+    sensor = sensor -1;
+
+    uint8_t value = 0;
+    // isolate
+    value = sensor_input_status & (1 << sensor);
+
+    // convert to bool
+    bool result = false;
+    if (value > 0) {
+        result = true;
+    }
+    return result;
 }
 
 // 5.2.3 LED Status
@@ -636,7 +655,9 @@ slight_CAP1188_TWI::multiple_touch_simultaneous_t slight_CAP1188_TWI::multiple_t
 // 5.17 Recalibration Configuration Register
 
 //
-// void slight_CAP1188_TWI::recalibration_configuration_set(uint8_t sensor_activate) {
+// void slight_CAP1188_TWI::recalibration_configuration_set(
+//     uint8_t sensor_activate
+// ) {
 //     // write register
 //     write_register(REG_Recalibration_Configuration, sensor_activate);
 // }
@@ -661,7 +682,7 @@ void slight_CAP1188_TWI::sensor_input_threshold_set(
         sensor = 1;
     }
     sensor = sensor -1;
-    if(value > B01111111) {
+    if (value > B01111111) {
         value = 127;
     }
     write_register(REG_Sensor_Input_1_Threshold + (sensor), value);
@@ -928,7 +949,10 @@ void slight_CAP1188_TWI::write_register(uint8_t reg_name, uint8_t value) {
     }
 }
 
-void slight_CAP1188_TWI::write_register(register_name_t reg_name, uint8_t value) {
+void slight_CAP1188_TWI::write_register(
+    register_name_t reg_name,
+    uint8_t value
+) {
     write_register((uint8_t)reg_name, value);
 }
 
@@ -942,7 +966,7 @@ uint8_t slight_CAP1188_TWI::read_register(uint8_t reg_name) {
         twi_state = (twi_state_t)Wire.endTransmission();
         if (twi_state == TWI_STATE_success) {
             // read data
-            Wire.requestFrom(twi_address, (uint8_t)1 );
+            Wire.requestFrom(twi_address, (uint8_t)1);
             result_value = Wire.read();
         } else {
             // print_transmission_state(Serial, twi_state);

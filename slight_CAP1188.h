@@ -213,6 +213,7 @@ public:
     // 5.2.2 Sensor Input Status
     uint8_t sensor_input_status_get_raw();
     uint8_t sensor_input_status_get();
+    bool sensor_input_status_get(uint8_t sensor);
     // 5.2.3 LED Status
     uint8_t led_status_get();
 
