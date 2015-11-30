@@ -301,8 +301,15 @@ public:
     // 5.24 Sensor Input Base Count Registers
 
     // 5.25 LED Output Type Register
+    // '0' = open drain with external pullup (only can drive low & highZ)
+    // '1' = push-pull output (drives high & low)
+    void led_output_type_set(uint8_t type_config);
+    void led_output_type_set_led(uint8_t led, bool type_config);
+    uint8_t led_output_type_get();
 
     // 5.26 Sensor Input LED Linking Register
+    // '0' = stand alone (default)
+    // '1' = linked with sensor input
     void sensor_input_led_linking_set(uint8_t linking);
     void sensor_input_led_linking_set_led(uint8_t led, bool link);
     uint8_t sensor_input_led_linking_get();
@@ -310,6 +317,11 @@ public:
     // 5.27 LED Polarity Register
 
     // 5.28 LED Output Control Register
+    // '0' = off
+    // '1' = activated
+    void led_output_control_set(uint8_t enable);
+    void led_output_control_set_led(uint8_t led, bool enable);
+    uint8_t led_output_control_get();
 
     // 5.29 Linked LED Transition Control Register
     // 5.30 LED Mirror Control Register

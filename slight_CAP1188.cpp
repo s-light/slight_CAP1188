@@ -444,9 +444,13 @@ slight_CAP1188_TWI::sensitivity_t slight_CAP1188_TWI::sensitivity_convert(
 // 5.4 Sensor Input Delta Count Registers
 
 uint8_t  slight_CAP1188_TWI::sensor_input_delta_count_get(uint8_t sensor) {
-    if(sensor > 7) {
-        sensor = 7;
+    if (sensor > 8) {
+        sensor = 8;
     }
+    if (sensor < 1) {
+        sensor = 1;
+    }
+    sensor = sensor -1;
     // read register
     uint8_t reg = read_register(REG_Sensor_Input_1_Delta_Count + (sensor));
     return reg;
@@ -459,9 +463,13 @@ void slight_CAP1188_TWI::sensor_input_enable_set_sensor(
     uint8_t sensor,
     bool enable
 ) {
-    if(sensor > 7) {
-        sensor = 7;
+    if (sensor > 8) {
+        sensor = 8;
     }
+    if (sensor < 1) {
+        sensor = 1;
+    }
+    sensor = sensor -1;
     // read register
     uint8_t reg = read_register(REG_Sensor_Input_Enable);
     // create mask
@@ -499,9 +507,13 @@ void slight_CAP1188_TWI::calibration_activate_sensor(
     uint8_t sensor
 ) {
     bool enable = 1;
-    if(sensor > 7) {
-        sensor = 7;
+    if (sensor > 8) {
+        sensor = 8;
     }
+    if (sensor < 1) {
+        sensor = 1;
+    }
+    sensor = sensor -1;
     // read register
     uint8_t reg = read_register(REG_Calibration_Activate);
     // create mask
@@ -642,9 +654,13 @@ void slight_CAP1188_TWI::sensor_input_threshold_set(
     uint8_t sensor,
     uint8_t value
 ) {
-    if(sensor > 7) {
-        sensor = 7;
+    if (sensor > 8) {
+        sensor = 8;
     }
+    if (sensor < 1) {
+        sensor = 1;
+    }
+    sensor = sensor -1;
     if(value > B01111111) {
         value = 127;
     }
@@ -671,6 +687,38 @@ uint8_t slight_CAP1188_TWI::sensor_input_threshold_get(uint8_t sensor) {
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.25 LED Output Type Register
+void slight_CAP1188_TWI::led_output_type_set(uint8_t type_config) {
+    write_register(REG_LED_Output_Type, type_config);
+}
+
+void slight_CAP1188_TWI::led_output_type_set_led(
+    uint8_t led,
+    bool type_config
+) {
+    if (led > 8) {
+        led = 8;
+    }
+    if (led < 1) {
+        led = 1;
+    }
+    led = led -1;
+    // read register
+    uint8_t reg = read_register(REG_LED_Output_Type);
+    // create mask
+    uint8_t mask = 1 << led;
+    // clear bit
+    reg = reg & (~mask);
+    // set bit
+    reg = reg | (type_config << led);
+    // write register
+    write_register(REG_LED_Output_Type, reg);
+}
+
+uint8_t slight_CAP1188_TWI::led_output_type_get() {
+    // read register
+    uint8_t reg = read_register(REG_LED_Output_Type);
+    return reg;
+}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.26 Sensor Input LED Linking Register
@@ -683,9 +731,13 @@ void slight_CAP1188_TWI::sensor_input_led_linking_set_led(
     uint8_t led,
     bool link
 ) {
-    if(led > 7) {
-        led = 7;
+    if (led > 8) {
+        led = 8;
     }
+    if (led < 1) {
+        led = 1;
+    }
+    led = led -1;
     // read register
     uint8_t reg = read_register(REG_Sensor_Input_LED_Linking);
     // create mask
@@ -710,6 +762,41 @@ uint8_t slight_CAP1188_TWI::sensor_input_led_linking_get() {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.28 LED Output Control Register
 
+void slight_CAP1188_TWI::led_output_control_set(uint8_t enable) {
+    write_register(REG_LED_Output_Control, enable);
+}
+
+void slight_CAP1188_TWI::led_output_control_set_led(
+    uint8_t led,
+    bool enable
+) {
+    if (led > 8) {
+        led = 8;
+    }
+    if (led < 1) {
+        led = 1;
+    }
+    led = led -1;
+    // read register
+    uint8_t reg = read_register(REG_LED_Output_Control);
+    // create mask
+    uint8_t mask = 1 << led;
+    // clear bit
+    reg = reg & (~mask);
+    // set bit
+    reg = reg | (enable << led);
+    // write register
+    write_register(REG_LED_Output_Control, reg);
+}
+
+uint8_t slight_CAP1188_TWI::led_output_control_get() {
+    // read register
+    uint8_t reg = read_register(REG_LED_Output_Control);
+    return reg;
+}
+
+
+// there are more...
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // basic read write operations

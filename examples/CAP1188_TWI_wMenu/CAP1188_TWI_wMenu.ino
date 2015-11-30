@@ -197,6 +197,11 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             out.println(F("\t 'b': multiple touch blocked enable set 'b1'"));
             out.println(F("\t 'B': multiple touch blocked enable get"));
             out.println();
+            out.println(F("\t 'l': setup leds special"));
+            out.println(F("\t 'L': print leds special"));
+            out.println(F("\t 'a': activate leds special"));
+            out.println(F("\t 'A': deactivate leds special"));
+            out.println();
             out.println(F("____________________________________________________________"));
         } break;
         case 'i': {
@@ -236,6 +241,10 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             out.println();
 
             out.println();
+
+            // set leds
+            myTouchSensor.led_output_control_set_led(7, 1);
+            myTouchSensor.led_output_control_set_led(8, 0);
 
             out.println(F("__________"));
         } break;
@@ -277,6 +286,7 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
         case 'R': {
             out.print(F("\t HW sensor reset .."));
             myTouchSensor.sensor_HW_reset();
+            myTouchSensor.sensor_default_configuration();
             out.print(F(". done"));
             Serial.println();
         } break;
@@ -292,6 +302,52 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             out.print(
                 myTouchSensor.multiple_touch_blocking_enable_get()
             );
+            Serial.println();
+        } break;
+        case 'l': {
+            out.print(F("\t setup leds special "));
+            // enable stand alone host control
+            myTouchSensor.sensor_input_led_linking_set_led(7, 0);
+            myTouchSensor.sensor_input_led_linking_set_led(8, 0);
+            // set output as push-pull
+            // myTouchSensor.led_output_type_set_led(7, 1);
+            // myTouchSensor.led_output_type_set_led(8, 1);
+            Serial.println();
+        } break;
+        case 'L': {
+            out.print(F("\t print leds special "));
+            Serial.println();
+            Serial.print(F("\t linking: "));
+            slight_DebugMenu::print_Binary_8(
+                Serial,
+                myTouchSensor.sensor_input_led_linking_get()
+            );
+            Serial.println();
+            Serial.print(F("\t output type: "));
+            slight_DebugMenu::print_Binary_8(
+                Serial,
+                myTouchSensor.led_output_type_get()
+            );
+            Serial.println();
+            Serial.print(F("\t output control: "));
+            slight_DebugMenu::print_Binary_8(
+                Serial,
+                myTouchSensor.led_output_control_get()
+            );
+            Serial.println();
+        } break;
+        case 'a': {
+            out.print(F("\t activate leds special "));
+            // set leds
+            myTouchSensor.led_output_control_set_led(7, 0);
+            myTouchSensor.led_output_control_set_led(8, 1);
+            Serial.println();
+        } break;
+        case 'A': {
+            out.print(F("\t deactivate leds special "));
+            // set leds
+            myTouchSensor.led_output_control_set_led(7, 1);
+            myTouchSensor.led_output_control_set_led(8, 0);
             Serial.println();
         } break;
         //---------------------------------------------------------------------
@@ -351,7 +407,9 @@ void myTouchSensor_init(Print &out) {
 
         myTouchSensor.touch_event_set_callback(touch_event);
 
-        // out.println("\t change config: ");
+        out.println("\t change config: ");
+
+
         // out.print("\t   get sensitivity: ");
         // // slight_CAP1188_TWI::sensitivity_print(out, myTouchSensor.sensitivity_get());
         // myTouchSensor.sensitivity_print(out);
