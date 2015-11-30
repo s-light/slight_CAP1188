@@ -309,9 +309,14 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             // enable stand alone host control
             myTouchSensor.sensor_input_led_linking_set_led(7, 0);
             myTouchSensor.sensor_input_led_linking_set_led(8, 0);
-            // set output as push-pull
-            // myTouchSensor.led_output_type_set_led(7, 1);
-            // myTouchSensor.led_output_type_set_led(8, 1);
+            // // set output as push-pull
+            myTouchSensor.led_output_type_set_led(7, 1);
+            myTouchSensor.led_output_type_set_led(8, 1);
+            // set led behavior to breathe
+            myTouchSensor.led_behavior_set(
+                7,
+                slight_CAP1188_TWI::behavior_breathe
+            );
             Serial.println();
         } break;
         case 'L': {
@@ -334,6 +339,14 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
                 Serial,
                 myTouchSensor.led_output_control_get()
             );
+            Serial.println();
+            Serial.print(F("\t behavior: "));
+            myTouchSensor.led_behavior_print(
+                Serial,
+                myTouchSensor.led_behavior_get(7)
+            );
+            Serial.println();
+            myTouchSensor.led_behavior_print_all(Serial);
             Serial.println();
         } break;
         case 'a': {

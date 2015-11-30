@@ -795,6 +795,116 @@ uint8_t slight_CAP1188_TWI::led_output_control_get() {
     return reg;
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 6.31 LED Behavior Registers
+void slight_CAP1188_TWI::led_behavior_set(
+    uint8_t led,
+    led_behavior_t behavior
+) {
+    if (led > 8) {
+        led = 8;
+    }
+    if (led < 1) {
+        led = 1;
+    }
+
+    // find right register to use:
+    register_name_t reg_behavior_n = REG_LED_Behavior_1;
+    if (led > 4) {
+        reg_behavior_n = REG_LED_Behavior_2;
+        // recaluclate led position in register
+        led = led - 4;
+    }
+
+    // calculat how fare we have to move the bits
+    uint8_t move_count = ((led-1) * 2);
+
+    // read register
+    uint8_t reg = read_register(reg_behavior_n);
+    // create mask
+    uint8_t mask = led_behavior_mask << move_count;
+    // clear bits
+    reg = reg & (~mask);
+    // set bits
+    reg = reg | (behavior << move_count);
+    // Serial.print(F("reg: "));
+    // Serial.print(reg, BIN);
+    // Serial.println();
+    // write register
+    write_register(reg_behavior_n, reg);
+}
+
+slight_CAP1188_TWI::led_behavior_t slight_CAP1188_TWI::led_behavior_get(
+    uint8_t led
+) {
+    if (led > 8) {
+        led = 8;
+    }
+    if (led < 1) {
+        led = 1;
+    }
+
+    // find right register to use:
+    register_name_t reg_behavior_n = REG_LED_Behavior_1;
+    if (led > 4) {
+        reg_behavior_n = REG_LED_Behavior_2;
+        // recaluclate led position in register
+        led = led - 4;
+    }
+
+    // calculat how fare we have to move the bits
+    uint8_t move_count = ((led-1) * 2);
+
+    // read register
+    uint8_t reg = read_register(reg_behavior_n);
+    // create mask
+    uint8_t mask = led_behavior_mask << move_count;
+    // isolate
+    reg = reg & mask;
+    // move to neutral position
+    reg = (reg >> move_count);
+    // create temp result variable
+    led_behavior_t result = behavior_direct;
+    // cast to result type
+    result = (led_behavior_t)reg;
+    return result;
+}
+
+void slight_CAP1188_TWI::led_behavior_print(
+    Print &out,
+    led_behavior_t behavior
+) {
+    switch (behavior) {
+        case behavior_direct: {
+            out.print(F("direct"));
+        } break;
+        case behavior_pulse1: {
+            out.print(F("pulse 1"));
+        } break;
+        case behavior_pulse2: {
+            out.print(F("pulse 2"));
+        } break;
+        case behavior_breathe: {
+            out.print(F("breathe"));
+        } break;
+    }
+}
+
+void slight_CAP1188_TWI::led_behavior_print_all(
+    Print &out
+) {
+    out.println(F("LED Behavior:"));
+    for (size_t led = 1; led <= 8; led++) {
+        led_behavior_t behavior;
+        behavior = led_behavior_get(led);
+        out.print(F("\t"));
+        out.print(led);
+        out.print(F(" : "));
+        led_behavior_print(out, behavior);
+        out.println();
+    }
+}
+
 
 // there are more...
 

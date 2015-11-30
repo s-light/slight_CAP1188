@@ -325,9 +325,24 @@ public:
 
     // 5.29 Linked LED Transition Control Register
     // 5.30 LED Mirror Control Register
+
     // 5.31 LED Behavior Registers
     // 5.31.1 LED Behavior 1
     // 5.31.2 LED Behavior 2
+    enum led_behavior_t {
+        behavior_direct =  B00000000,
+        behavior_pulse1 =  B00000001,
+        behavior_pulse2 =  B00000010,
+        behavior_breathe = B00000011,
+    };
+    static const uint8_t led_behavior_mask = B00000011;
+
+    void led_behavior_set(uint8_t led, led_behavior_t behavior);
+    led_behavior_t led_behavior_get(uint8_t led);
+    static void led_behavior_print(Print &out, led_behavior_t behavior);
+    void led_behavior_print_all(Print &out);
+
+    // 5.32 ...
     // led things...
 
     // 5.39 Sensor Input Calibration Registers
