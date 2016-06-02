@@ -358,32 +358,6 @@ slight_CAP1188_TWI::sensitivity_t slight_CAP1188_TWI::sensitivity_get() {
     uint8_t value = reg & sensitivity_mask;
     sensitivity_t result;
     result = (sensitivity_t)value;
-    // switch (value) {
-    //     case sensitivity_128x: {
-    //         result = sensitivity_128x;
-    //     } break;
-    //     case sensitivity_64x: {
-    //         result = sensitivity_64x;
-    //     } break;
-    //     case sensitivity_32x: {
-    //         result = sensitivity_32x;
-    //     } break;
-    //     case sensitivity_16x: {
-    //         result = sensitivity_16x;
-    //     } break;
-    //     case sensitivity_8x: {
-    //         result = sensitivity_8x;
-    //     } break;
-    //     case sensitivity_4x: {
-    //         result = sensitivity_4x;
-    //     } break;
-    //     case sensitivity_2x: {
-    //         result = sensitivity_2x;
-    //     } break;
-    //     case sensitivity_1x: {
-    //         result = sensitivity_1x;
-    //     } break;
-    // }
     return result;
 }
 
@@ -395,30 +369,34 @@ void slight_CAP1188_TWI::sensitivity_print(
     Print &out,
     slight_CAP1188_TWI::sensitivity_t value
 ) {
+    out.print(F("sensitivity "));
     switch (value) {
         case sensitivity_128x: {
-            out.print(F("sensitivity 128x"));
+            out.print(F("128x"));
         } break;
         case sensitivity_64x: {
-            out.print(F("sensitivity 64x"));
+            out.print(F("64x"));
         } break;
         case sensitivity_32x: {
-            out.print(F("sensitivity 32x"));
+            out.print(F("32x"));
         } break;
         case sensitivity_16x: {
-            out.print(F("sensitivity 16x"));
+            out.print(F("16x"));
         } break;
         case sensitivity_8x: {
-            out.print(F("sensitivity 8x"));
+            out.print(F("8x"));
         } break;
         case sensitivity_4x: {
-            out.print(F("sensitivity 4x"));
+            out.print(F("4x"));
         } break;
         case sensitivity_2x: {
-            out.print(F("sensitivity 2x"));
+            out.print(F("2x"));
         } break;
         case sensitivity_1x: {
-            out.print(F("sensitivity 1x"));
+            out.print(F("1x"));
+        } break;
+        default: {
+            out.print(F("?x"));
         } break;
     }
 
@@ -928,6 +906,48 @@ void slight_CAP1188_TWI::led_behavior_print_all(
 
 
 // there are more...
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 5.39 Sensor Input Calibration Registers
+uint16_t slight_CAP1188_TWI::sensor_input_calibration_value_get(
+  uint8_t sensor
+) {
+    if (sensor > 8) {
+        sensor = 8;
+    }
+    if (sensor < 1) {
+        sensor = 1;
+    }
+
+    uint8_t reg_raw = read_register(
+        REG_Sensor_Input_1_Calibration  + (sensor-1)
+    );
+
+    uint16_t result = reg_raw << 2;
+    uint8_t reg_lsb = 0;
+    uint8_t lsb_offset = 0;
+    if (sensor < 5) {
+        reg_lsb = read_register(REG_Sensor_Input_Calibration_LSB_1);
+        lsb_offset = sensor * 2;
+    } else {
+        reg_lsb = read_register(REG_Sensor_Input_Calibration_LSB_2);
+        lsb_offset = (sensor-4) * 2;
+    }
+
+    uint8_t lsb_sensor = 0;
+    // isolate
+    lsb_sensor = reg_lsb & (1 << lsb_offset);
+
+    result = result & lsb_sensor;
+
+
+    return result;
+}
+
+// there are more...
+
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // basic read write operations

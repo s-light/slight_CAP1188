@@ -347,6 +347,8 @@ public:
     // led things...
 
     // 5.39 Sensor Input Calibration Registers
+    uint16_t sensor_input_calibration_value_get(uint8_t sensor);
+    
     // 5.40 Product ID Register
     // 5.41 Manufacturer ID Register
     // 5.42 Revision Register
