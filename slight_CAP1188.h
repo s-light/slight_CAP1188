@@ -223,6 +223,7 @@ public:
 
     // 5.3 noise flags
     uint8_t noise_flags_get();
+    bool noise_flag_sensor_get(uint8_t sensor);
 
     // 5.4 Sensor Input Delta Count Registers
     int8_t sensor_input_delta_count_get(uint8_t sensor);
@@ -259,6 +260,55 @@ public:
     // 5.9 Sensor Input Configuration 2 Register
 
     // 5.10 Averaging and Sampling Configuration Register
+
+        // AVG (B6, B5, B4)
+        enum avg_samples_t {
+            avg_samples_1 =   B00000000,
+            avg_samples_2 =   B00010000,
+            avg_samples_4 =   B00100000,
+            avg_samples_8 =   B00110000,   // default
+            avg_samples_16 =  B01000000,
+            avg_samples_32 =  B01010000,
+            avg_samples_64 =  B01100000,
+            avg_samples_128 = B01110000,
+        };
+        static const uint8_t avg_samples_mask = B01110000;
+        void avg_samples_set(avg_samples_t value);
+        void avg_samples_set(uint8_t value);
+        avg_samples_t avg_samples_get();
+        static avg_samples_t avg_samples_convert(uint8_t value);
+        static void avg_samples_print(Print &out, avg_samples_t value);
+        void avg_samples_print(Print &out);
+
+        // SAMP_TIME[ (B3, B2)
+        enum sample_time_t {
+            sample_time_320 =  B00000000,
+            sample_time_640 =  B00000100,
+            sample_time_1280 = B00001000,  // default
+            sample_time_2560 = B00001100,
+        };
+        static const uint8_t sample_time_mask = B0001100;
+        void sample_time_set(sample_time_t value);
+        void sample_time_set(uint8_t value);
+        sample_time_t sample_time_get();
+        static sample_time_t sample_time_convert(uint8_t value);
+        static void sample_time_print(Print &out, sample_time_t value);
+        void sample_time_print(Print &out);
+
+        // CYCLE_TIME (B1, B0)
+        enum cycle_time_t {
+            cycle_time_35 =  B00000000,
+            cycle_time_70 =  B00000001,  // default
+            cycle_time_105 = B00000010,
+            cycle_time_140 = B00000011,
+        };
+        static const uint8_t cycle_time_mask = B0000011;
+        void cycle_time_set(cycle_time_t value);
+        void cycle_time_set(uint8_t value);
+        cycle_time_t cycle_time_get();
+        static cycle_time_t cycle_time_convert(uint8_t value);
+        static void cycle_time_print(Print &out, cycle_time_t value);
+        void cycle_time_print(Print &out);
 
     // 5.11 Calibration Activate Register
     void calibration_activate_sensor(uint8_t sensor);

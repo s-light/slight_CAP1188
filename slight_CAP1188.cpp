@@ -361,6 +361,28 @@ uint8_t slight_CAP1188_TWI::noise_flags_get() {
     return reg;
 }
 
+bool slight_CAP1188_TWI::noise_flag_sensor_get(uint8_t sensor) {
+    if (sensor > 8) {
+        sensor = 8;
+    }
+    if (sensor < 1) {
+        sensor = 1;
+    }
+    sensor = sensor -1;
+
+    uint8_t value = 0;
+    // isolate
+    value = noise_flags_get() & (1 << sensor);
+
+    // convert to bool
+    bool result = false;
+    if (value > 0) {
+        result = true;
+    }
+    return result;
+}
+
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.4 Sensor Input Delta Count Registers
 
@@ -485,6 +507,9 @@ slight_CAP1188_TWI::sensitivity_t slight_CAP1188_TWI::sensitivity_convert(
     return result;
 }
 
+    // in this register there are also the BASE_SHIFT values.
+    // regarding the datasheet they don't alter sensing behavior
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.7 Sensor Input Enable Registers
 
@@ -528,6 +553,277 @@ uint8_t slight_CAP1188_TWI::sensor_input_enable_get() {
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.10 Averaging and Sampling Configuration Register
+
+// AVG (B6, B5, B4)
+
+void slight_CAP1188_TWI::avg_samples_set(
+    slight_CAP1188_TWI::avg_samples_t value
+) {
+    // read register
+    uint8_t reg = read_register(REG_Averaging_and_Sampling_Config);
+    // clear bits
+    reg = reg & (~avg_samples_mask);
+    // set bits
+    reg = reg | value;
+    // write register
+    write_register(REG_Averaging_and_Sampling_Config, reg);
+}
+
+void slight_CAP1188_TWI::avg_samples_set(
+    uint8_t value
+) {
+    avg_samples_set(
+        avg_samples_convert(value)
+    );
+}
+
+slight_CAP1188_TWI::avg_samples_t slight_CAP1188_TWI::avg_samples_get() {
+    // read register
+    uint8_t reg = read_register(REG_Averaging_and_Sampling_Config);
+    // isolate bits
+    uint8_t value = reg & avg_samples_mask;
+    avg_samples_t result;
+    result = (avg_samples_t)value;
+    return result;
+}
+
+void slight_CAP1188_TWI::avg_samples_print(Print &out) {
+    avg_samples_print(out, avg_samples_get());
+}
+
+void slight_CAP1188_TWI::avg_samples_print(
+    Print &out,
+    slight_CAP1188_TWI::avg_samples_t value
+) {
+    // out.print(F("avg_samples "));
+    switch (value) {
+        case avg_samples_128: {
+            out.print(F("128"));
+        } break;
+        case avg_samples_64: {
+            out.print(F("64"));
+        } break;
+        case avg_samples_32: {
+            out.print(F("32"));
+        } break;
+        case avg_samples_16: {
+            out.print(F("16"));
+        } break;
+        case avg_samples_8: {
+            out.print(F("8"));
+        } break;
+        case avg_samples_4: {
+            out.print(F("4"));
+        } break;
+        case avg_samples_2: {
+            out.print(F("2"));
+        } break;
+        case avg_samples_1: {
+            out.print(F("1"));
+        } break;
+        default: {
+            out.print(F("?"));
+        } break;
+    }
+    //
+    // uint8_t value_dec = (value >> 4)+1;
+    // out.print(value_dec);
+}
+
+slight_CAP1188_TWI::avg_samples_t slight_CAP1188_TWI::avg_samples_convert(
+    uint8_t value
+) {
+    avg_samples_t result = avg_samples_8;
+    switch (value) {
+        case 128: {
+            result = avg_samples_128;
+        } break;
+        case 64: {
+            result = avg_samples_64;
+        } break;
+        case 32: {
+            result = avg_samples_32;
+        } break;
+        case 16: {
+            result = avg_samples_16;
+        } break;
+        case 8: {
+            result = avg_samples_8;
+        } break;
+        case 4: {
+            result = avg_samples_4;
+        } break;
+        case 2: {
+            result = avg_samples_2;
+        } break;
+        case 1: {
+            result = avg_samples_1;
+        } break;
+    }
+    return result;
+}
+
+
+// SAMP_TIME[ (B3, B2)
+
+void slight_CAP1188_TWI::sample_time_set(
+    slight_CAP1188_TWI::sample_time_t value
+) {
+    // read register
+    uint8_t reg = read_register(REG_Averaging_and_Sampling_Config);
+    // clear bits
+    reg = reg & (~sample_time_mask);
+    // set bits
+    reg = reg | value;
+    // write register
+    write_register(REG_Averaging_and_Sampling_Config, reg);
+}
+
+void slight_CAP1188_TWI::sample_time_set(
+    uint8_t value
+) {
+    sample_time_set(
+        sample_time_convert(value)
+    );
+}
+
+slight_CAP1188_TWI::sample_time_t slight_CAP1188_TWI::sample_time_get() {
+    // read register
+    uint8_t reg = read_register(REG_Averaging_and_Sampling_Config);
+    // isolate bits
+    uint8_t value = reg & sample_time_mask;
+    sample_time_t result;
+    result = (sample_time_t)value;
+    return result;
+}
+
+void slight_CAP1188_TWI::sample_time_print(Print &out) {
+    sample_time_print(out, sample_time_get());
+}
+
+void slight_CAP1188_TWI::sample_time_print(
+    Print &out,
+    slight_CAP1188_TWI::sample_time_t value
+) {
+    // out.print(F("sample_time "));
+    switch (value) {
+        case sample_time_320: {
+            out.print(F("320"));
+        } break;
+        case sample_time_640: {
+            out.print(F("640"));
+        } break;
+        case sample_time_1280: {
+            out.print(F("1280"));
+        } break;
+        case sample_time_2560: {
+            out.print(F("2560"));
+        } break;
+    }
+    out.print(F("us"));
+}
+
+slight_CAP1188_TWI::sample_time_t slight_CAP1188_TWI::sample_time_convert(
+    uint8_t value
+) {
+    sample_time_t result = sample_time_1280;
+    if (value < 45) {
+        result = sample_time_320;
+    } else {
+        if (value < 90) {
+            result = sample_time_640;
+        } else {
+            if (value < 200) {
+                result = sample_time_1280;
+            } else {
+                result = sample_time_2560;
+            }
+        }
+    }
+    return result;
+}
+
+// CYCLE_TIME (B1, B0)
+
+void slight_CAP1188_TWI::cycle_time_set(
+    slight_CAP1188_TWI::cycle_time_t value
+) {
+    // read register
+    uint8_t reg = read_register(REG_Averaging_and_Sampling_Config);
+    // clear bits
+    reg = reg & (~cycle_time_mask);
+    // set bits
+    reg = reg | value;
+    // write register
+    write_register(REG_Averaging_and_Sampling_Config, reg);
+}
+
+void slight_CAP1188_TWI::cycle_time_set(
+    uint8_t value
+) {
+    cycle_time_set(
+        cycle_time_convert(value)
+    );
+}
+
+slight_CAP1188_TWI::cycle_time_t slight_CAP1188_TWI::cycle_time_get() {
+    // read register
+    uint8_t reg = read_register(REG_Averaging_and_Sampling_Config);
+    // isolate bits
+    uint8_t value = reg & cycle_time_mask;
+    cycle_time_t result;
+    result = (cycle_time_t)value;
+    return result;
+}
+
+void slight_CAP1188_TWI::cycle_time_print(Print &out) {
+    cycle_time_print(out, cycle_time_get());
+}
+
+void slight_CAP1188_TWI::cycle_time_print(
+    Print &out,
+    slight_CAP1188_TWI::cycle_time_t value
+) {
+    // out.print(F("cycle_time "));
+    switch (value) {
+        case cycle_time_35: {
+            out.print(F("35"));
+        } break;
+        case cycle_time_70: {
+            out.print(F("70"));
+        } break;
+        case cycle_time_105: {
+            out.print(F("105"));
+        } break;
+        case cycle_time_140: {
+            out.print(F("140"));
+        } break;
+        default: {
+            out.print(F("?"));
+        } break;
+    }
+    out.print(F("ms"));
+}
+
+slight_CAP1188_TWI::cycle_time_t slight_CAP1188_TWI::cycle_time_convert(
+    uint8_t value
+) {
+    cycle_time_t result = cycle_time_70;
+    if (value < 50) {
+        result = cycle_time_35;
+    } else {
+        if (value < 90) {
+            result = cycle_time_70;
+        } else {
+            if (value < 125) {
+                result = cycle_time_105;
+            } else {
+                result = cycle_time_140;
+            }
+        }
+    }
+    return result;
+}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.11 Calibration Activate Register

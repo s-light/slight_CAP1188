@@ -224,6 +224,37 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             myTouchSensor.sensitivity_print(out);
             out.println();
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // 5.7 Sensor Input Enable Registers
+            out.print(F("\t 'e': sensor input enable set sensor'e0:1'; "));
+            // out.print(F("\t 'e': sensor input enable set'e255' (3=S1+S2 en); "));
+            slight_DebugMenu::print_Binary_8(
+                out,
+                myTouchSensor.sensor_input_enable_get()
+            );
+            out.println();
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // 5.10 Averaging and Sampling Configuration Register
+            // avg_samples
+            out.print(F("\t 'A': avg samples set [1, 2, .., 64, 128] 'A8'; "));
+            myTouchSensor.avg_samples_print(out);
+            out.println();
+            // sample_time
+            out.print(F("\t 'S': sample time set [1..255: 320, 640, 1280, 2560] 'S128'; "));
+            myTouchSensor.sample_time_print(out);
+            out.println();
+            // cycle_time
+            out.print(F("\t 'C': cycle time set [1..255: 35, 70, 105, 140] 'C70'; "));
+            myTouchSensor.cycle_time_print(out);
+            out.println();
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // 5.11 Calibration Activate Register
+            out.print(F("\t 'a': calibration activate sensor 'a1'; "));
+            slight_DebugMenu::print_Binary_8(
+                out,
+                myTouchSensor.calibration_activate_get()
+            );
+            out.println();
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // 5.14 Multiple Touch Configuration Register
             out.print(F("\t 'b': multiple touch blocked enable set 'b1'; "));
             out.print(
@@ -246,29 +277,11 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             out.println();
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // 5.24 Sensor Input Base Count Registers
-            out.print(F("\t 'a': calibration activate sensor 'a1'; "));
-            slight_DebugMenu::print_Binary_8(
-                out,
-                myTouchSensor.calibration_activate_get()
-            );
             out.println();
-            out.print(F("\t 'e': sensor input enable set sensor'e0:1'; "));
-            // out.print(F("\t 'e': sensor input enable set'e255' (3=S1+S2 en); "));
-            out.print(F("\t sensor input enabled: "));
-            slight_DebugMenu::print_Binary_8(
-                out,
-                myTouchSensor.sensor_input_enable_get()
-            );
-            out.println();
-            // out.println(F("\t 'E': sensor input enable get"));
-            out.println();
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // HW reset things
             out.println(F("\t 'r': soft reset of sensor 'r1'"));
             out.println(F("\t 'R': HW sensor reset "));
-            // out.println();
-            // out.println(F("\t 'l': setup leds special"));
-            // out.println(F("\t 'L': print leds special"));
-            // out.println(F("\t 'a': activate leds special"));
-            // out.println(F("\t 'A': deactivate leds special"));
             // out.println();
             out.println(F("____________________________________________________________"));
         } break;
@@ -355,6 +368,8 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             out.println();
         } break;
         //---------------------------------------------------------------------
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // 5.1 Main Control Registers - Gain
         case 'g': {
             out.print(F("\t gain set "));
             // convert part of string to int
@@ -366,6 +381,8 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             myTouchSensor.gain_print(out);
             out.println();
         } break;
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // 5.5 Sensitivity Control Register
         case 's': {
             out.print(F("\t sensitivity set "));
             // convert part of string to int
@@ -377,46 +394,8 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             myTouchSensor.sensitivity_print(out);
             out.println();
         } break;
-        case 't': {
-            out.print(F("\t threshold set "));
-            // t0:127
-            uint8_t input = atoi(&command[1]);
-            uint8_t value = atoi(&command[3]);
-            out.print(input);
-            out.print(F(":"));
-            out.print(value);
-            myTouchSensor.sensor_input_threshold_set(input, value);
-            out.println();
-        } break;
-        case 'n': {
-            out.print(F("\t noise threshold set "));
-            // t0:127
-            uint8_t value = atoi(&command[1]);
-            out.print(value);
-            myTouchSensor.sensor_input_noise_threshold_set(value);
-            out.print(F(" --> "));
-            myTouchSensor.sensor_input_noise_threshold_print(out);
-            out.print(F("%"));
-            out.println();
-        } break;
-        case 'b': {
-            out.print(F("\t multiple touch blocked enable set "));
-            uint8_t value = atoi(&command[1]);
-            out.print(value);
-            myTouchSensor.multiple_touch_blocking_enable_set(value);
-            out.println();
-        } break;
-        case 'a': {
-            out.print(F("\t calibration activate sensor set "));
-            // a0
-            uint8_t input = atoi(&command[1]);
-            // uint8_t value = atoi(&command[3]);
-            out.print(input);
-            // out.print(F(":"));
-            // out.print(value);
-            myTouchSensor.calibration_activate_sensor(input);
-            out.println();
-        } break;
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // 5.7 Sensor Input Enable Registers
         case 'e': {
             out.print(F("\t sensor input enable set sensor "));
             // a0:1
@@ -428,22 +407,94 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             myTouchSensor.sensor_input_enable_set_sensor(input, value);
             out.println();
         } break;
-        // case 'e': {
-        //     out.print(F("\t sensor input enable set "));
-        //     // a0:1
-        //     uint8_t value = atoi(&command[1]);
-        //     out.print(value);
-        //     myTouchSensor.sensor_input_enable_set(value);
-        //     out.println();
-        // } break;
-        // case 'E': {
-        //     out.print(F("\t calibration activate sensor get "));
-        //     slight_DebugMenu::print_Binary_8(
-        //         out,
-        //         myTouchSensor.sensor_input_enable_get()
-        //     );
-        //     out.println();
-        // } break;
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // 5.10 Averaging and Sampling Configuration Register
+        // avg_samples
+        case 'A': {
+            out.print(F("\t avg samples set "));
+            // convert part of string to int
+            // (up to first char that is not a number)
+            uint8_t value = atoi(&command[1]);
+            out.print(value);
+            out.print(F(" --> "));
+            myTouchSensor.avg_samples_set(value);
+            myTouchSensor.avg_samples_print(out);
+            out.println();
+        } break;
+        // sample_time
+        case 'S': {
+            out.print(F("\t sample time set "));
+            // convert part of string to int
+            // (up to first char that is not a number)
+            uint8_t value = atoi(&command[1]);
+            out.print(value);
+            out.print(F(" --> "));
+            myTouchSensor.sample_time_set(value);
+            myTouchSensor.sample_time_print(out);
+            out.println();
+        } break;
+        // cycle_time
+        case 'C': {
+            out.print(F("\t cycle time set "));
+            // convert part of string to int
+            // (up to first char that is not a number)
+            uint8_t value = atoi(&command[1]);
+            out.print(value);
+            out.print(F(" --> "));
+            myTouchSensor.cycle_time_set(value);
+            myTouchSensor.cycle_time_print(out);
+            out.println();
+        } break;
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // 5.11 Calibration Activate Register
+        case 'a': {
+            out.print(F("\t calibration activate sensor set "));
+            // a0
+            uint8_t input = atoi(&command[1]);
+            // uint8_t value = atoi(&command[3]);
+            out.print(input);
+            // out.print(F(":"));
+            // out.print(value);
+            myTouchSensor.calibration_activate_sensor(input);
+            out.println();
+        } break;
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // 5.14 Multiple Touch Configuration Register
+        case 'b': {
+            out.print(F("\t multiple touch blocked enable set "));
+            uint8_t value = atoi(&command[1]);
+            out.print(value);
+            myTouchSensor.multiple_touch_blocking_enable_set(value);
+            out.println();
+        } break;
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // 5.18 Sensor Input Threshold Registers
+        case 't': {
+            out.print(F("\t threshold set "));
+            // t0:127
+            uint8_t input = atoi(&command[1]);
+            uint8_t value = atoi(&command[3]);
+            out.print(input);
+            out.print(F(":"));
+            out.print(value);
+            myTouchSensor.sensor_input_threshold_set(input, value);
+            out.println();
+        } break;
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // 5.19 Sensor Input Noise Threshold Register
+        case 'n': {
+            out.print(F("\t noise threshold set "));
+            // t0:127
+            uint8_t value = atoi(&command[1]);
+            out.print(value);
+            myTouchSensor.sensor_input_noise_threshold_set(value);
+            out.print(F(" --> "));
+            myTouchSensor.sensor_input_noise_threshold_print(out);
+            out.print(F("%"));
+            out.println();
+        } break;
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // HW reset things
         case 'r': {
             out.print(F("\t reset without loading defaults."));
             // out.print(F(" -- TODO --"));
@@ -537,26 +588,26 @@ void myTouchSensor_write_appsettings(Print &out) {
 
         out.println("\t change config: ");
 
-        out.println("\t   activate only Sensor1&2");
-        myTouchSensor.sensor_input_enable_set(0b00000011);
+        // out.println("\t   activate only Sensor1&2");
+        // myTouchSensor.sensor_input_enable_set(0b00000011);
         // setup RECALIBRATION CONFIGURATION REGISTERS
         // default: 0b10001010
         // set BUT_LD_TH to 0. (Each Sensor Input X Threshold register is
         //                      updated individually.)
-        myTouchSensor.write_register(
-            slight_CAP1188_TWI::REG_Recalibration_Configuration,
-            0b00001010
-        );
+        // myTouchSensor.write_register(
+        //     slight_CAP1188_TWI::REG_Recalibration_Configuration,
+        //     0b00001010
+        // );
         // setup AVERAGING AND SAMPLING CONFIGURATION REGISTER
         // default: 0b00111001
         // set
         // AVG (B6, B5, B4) to 32 (101) (default: 8 011)
         // SAMP_TIME (B3, B2) to 2.56ms (11) (default: 1.28ms 10).
         // CYCLE_TIME (B1, B0) to 35ms (00) (default: 70ms 01)
-        myTouchSensor.write_register(
-            slight_CAP1188_TWI::REG_Averaging_and_Sampling_Config,
-            0b01010000
-        );
+        // myTouchSensor.write_register(
+        //     slight_CAP1188_TWI::REG_Averaging_and_Sampling_Config,
+        //     0b01010000
+        // );
         // setup 6.19 Sensor Input Noise Threshold Register
         // default: 0b00000001
         // mask: 0b00000011
@@ -652,7 +703,11 @@ void myTouchSensor_debugOut_print_start(Print &out) {
         out.println();
         out.println();
         out.println();
-        out.println(F("BaseCount, deltaCount, calibration"));
+        out.print(F("NoiseFlag, "));
+        out.print(F("BaseCount, "));
+        out.print(F("deltaCount, "));
+        out.print(F("calibration, "));
+        out.println();
     }
 }
 
@@ -681,17 +736,24 @@ void myTouchSensor_debugOut_print(Print &out) {
     // out.println(F("\t list: BaseC, deltaC, cali"));
     // Line 3
     // out.print(F("\t\t1: "));
+    uint8_t sensor = 1;
     out.print(
-        myTouchSensor.sensor_input_base_count_get(1)
+        myTouchSensor.noise_flag_sensor_get(sensor)
     );
     out.print(F(", "));
     out.print(
-        myTouchSensor.sensor_input_delta_count_get(1)
+        myTouchSensor.sensor_input_base_count_get(sensor)
     );
     out.print(F(", "));
     out.print(
-        myTouchSensor.sensor_input_calibration_value_get(1)
+        myTouchSensor.sensor_input_delta_count_get(sensor)
     );
+    out.print(F(", "));
+    out.print(
+        myTouchSensor.sensor_input_calibration_value_get(sensor)
+    );
+    out.print(F(", "));
+
     out.println();
     // // Line 4
     // out.print(F("\t\t2: "));
