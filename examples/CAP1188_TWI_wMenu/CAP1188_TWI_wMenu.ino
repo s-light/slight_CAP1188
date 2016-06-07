@@ -371,7 +371,7 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
                 out.println(F("' not recognized. try again."));
             }
             pInstance->get_command_input_pointer()[0] = '?';
-            pInstance->set_flag_EOL(true);
+            pInstance->set_flag_EOC(true);
         }
     } // end switch
 

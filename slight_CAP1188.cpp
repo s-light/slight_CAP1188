@@ -440,7 +440,7 @@ slight_CAP1188_TWI::sensitivity_t slight_CAP1188_TWI::sensitivity_convert(
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.4 Sensor Input Delta Count Registers
 
-uint8_t  slight_CAP1188_TWI::sensor_input_delta_count_get(uint8_t sensor) {
+int8_t  slight_CAP1188_TWI::sensor_input_delta_count_get(uint8_t sensor) {
     if (sensor > 8) {
         sensor = 8;
     }
@@ -449,7 +449,7 @@ uint8_t  slight_CAP1188_TWI::sensor_input_delta_count_get(uint8_t sensor) {
     }
     sensor = sensor -1;
     // read register
-    uint8_t reg = read_register(REG_Sensor_Input_1_Delta_Count + (sensor));
+    int8_t reg = read_register(REG_Sensor_Input_1_Delta_Count + (sensor));
     return reg;
 }
 
@@ -667,6 +667,13 @@ void slight_CAP1188_TWI::sensor_input_threshold_set(
 }
 
 uint8_t slight_CAP1188_TWI::sensor_input_threshold_get(uint8_t sensor) {
+    if (sensor > 8) {
+        sensor = 8;
+    }
+    if (sensor < 1) {
+        sensor = 1;
+    }
+    sensor = sensor -1;
     // read register
     uint8_t reg = read_register(REG_Sensor_Input_1_Threshold + (sensor));
     return reg;
@@ -674,6 +681,92 @@ uint8_t slight_CAP1188_TWI::sensor_input_threshold_get(uint8_t sensor) {
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.19 Sensor Input Noise Threshold Register
+slight_CAP1188_TWI::sensor_input_noise_threshold_t
+slight_CAP1188_TWI::sensor_input_noise_threshold_convert(
+    uint8_t value
+) {
+    sensor_input_noise_threshold_t result = threshold_37_5;
+    // threshold_25
+    // threshold_37_5
+    // threshold_50
+    // threshold_62_5
+    if (value < 30) {
+        result = threshold_25;
+    } else {
+        if (value < 45) {
+            result = threshold_37_5;
+        } else {
+            if (value < 55) {
+                result = threshold_50;
+            } else {
+                result = threshold_62_5;
+            }
+        }
+    }
+    return result;
+}
+
+void slight_CAP1188_TWI::sensor_input_noise_threshold_print(
+    Print &out,
+    slight_CAP1188_TWI::sensor_input_noise_threshold_t value
+) {
+    switch (value) {
+        case threshold_25: {
+            out.print(F("25"));
+        } break;
+        case threshold_37_5: {
+            out.print(F("37.5"));
+        } break;
+        case threshold_50: {
+            out.print(F("50"));
+        } break;
+        case threshold_62_5: {
+            out.print(F("62.5"));
+        } break;
+    }
+}
+
+void slight_CAP1188_TWI::sensor_input_noise_threshold_print(
+    Print &out
+) {
+    sensor_input_noise_threshold_print(
+        out,
+        sensor_input_noise_threshold_get()
+    );
+}
+
+void slight_CAP1188_TWI::sensor_input_noise_threshold_set(
+    slight_CAP1188_TWI::sensor_input_noise_threshold_t value
+) {
+    // for this register not really neaded - no other values in bit field.
+    // read register
+    uint8_t reg = read_register(REG_Sensor_Input_Noise_Threshold);
+    // clear bits
+    reg = reg & (~sensor_input_noise_threshold_mask);
+    // set bits
+    reg = reg | value;
+    // write register
+    write_register(REG_Sensor_Input_Noise_Threshold, reg);
+}
+
+void slight_CAP1188_TWI::sensor_input_noise_threshold_set(
+    uint8_t value
+) {
+    sensor_input_noise_threshold_set(
+        sensor_input_noise_threshold_convert(value)
+    );
+}
+
+slight_CAP1188_TWI::sensor_input_noise_threshold_t slight_CAP1188_TWI::sensor_input_noise_threshold_get() {
+    uint8_t reg = read_register(REG_Sensor_Input_Noise_Threshold);
+    // isolate bits
+    uint8_t value = reg & sensor_input_noise_threshold_mask;
+    sensor_input_noise_threshold_t result;
+    // cast
+    result = (sensor_input_noise_threshold_t)value;
+    return result;
+}
+
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.20 Standby Channel Register
@@ -683,6 +776,20 @@ uint8_t slight_CAP1188_TWI::sensor_input_threshold_get(uint8_t sensor) {
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.24 Sensor Input Base Count Registers
+uint8_t slight_CAP1188_TWI::sensor_input_base_count_get(
+  uint8_t sensor
+) {
+    if (sensor > 8) {
+        sensor = 8;
+    }
+    if (sensor < 1) {
+        sensor = 1;
+    }
+    sensor = sensor -1;
+    // read register
+    int8_t reg = read_register(REG_Sensor_Input_1_Base_Count + (sensor));
+    return reg;
+}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.25 LED Output Type Register
@@ -924,29 +1031,86 @@ uint16_t slight_CAP1188_TWI::sensor_input_calibration_value_get(
         REG_Sensor_Input_1_Calibration  + (sensor-1)
     );
 
+    // Serial.println();
+    // Serial.println();
+    // Serial.print(F("reg_raw:"));
+    // Serial.print(reg_raw);
+    // Serial.println();
+    //
+    // Serial.print(F("sensor:"));
+    // Serial.print(sensor);
+    // Serial.println();
+
     uint16_t result = reg_raw << 2;
-    uint8_t reg_lsb = 0;
-    uint8_t lsb_offset = 0;
+
+    // Serial.print(F("result:"));
+    // Serial.print(result);
+    // Serial.println();
+
+    uint8_t reg_lsb = 255;
+    uint8_t lsb_offset = 255;
     if (sensor < 5) {
+        // Serial.println(F("sensor < 5"));
         reg_lsb = read_register(REG_Sensor_Input_Calibration_LSB_1);
-        lsb_offset = sensor * 2;
+        lsb_offset = (sensor-1) * 2;
     } else {
+        // Serial.println(F("sensor >= 5"));
         reg_lsb = read_register(REG_Sensor_Input_Calibration_LSB_2);
-        lsb_offset = (sensor-4) * 2;
+        lsb_offset = ((sensor-1)-4) * 2;
     }
+
+    // Serial.print(F("lsb_offset:"));
+    // Serial.print(lsb_offset);
+    // Serial.println();
+
+    // Serial.print(F("reg_lsb:"));
+    // // Serial.print(reg_lsb, BIN);
+    // Serial.print(reg_lsb);
+    // Serial.println();
 
     uint8_t lsb_sensor = 0;
     // isolate
-    lsb_sensor = reg_lsb & (1 << lsb_offset);
+    lsb_sensor = reg_lsb & (0b11 << lsb_offset);
 
-    result = result & lsb_sensor;
+    // Serial.print(F("lsb_sensor:"));
+    // Serial.print(lsb_sensor);
+    // Serial.println();
 
+    result = result | lsb_sensor;
+
+    // Serial.print(F("result:"));
+    // Serial.print(result);
+    // Serial.println();
+    // Serial.println();
+    // Serial.println();
 
     return result;
 }
 
-// there are more...
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 5.40 Product ID Register
+uint8_t slight_CAP1188_TWI::product_ID_get() {
+    uint8_t reg_raw;
+    reg_raw = read_register(REG_Product_ID);
+    return reg_raw;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 5.41 Manufacturer ID Register
+uint8_t slight_CAP1188_TWI::manufacturer_ID_get() {
+    uint8_t reg_raw;
+    reg_raw = read_register(REG_Manufacturer_ID);
+    return reg_raw;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 5.42 Revision Register
+uint8_t slight_CAP1188_TWI::revision_get() {
+    uint8_t reg_raw;
+    reg_raw = read_register(REG_Revision_ID);
+    return reg_raw;
+}
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

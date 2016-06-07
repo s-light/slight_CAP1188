@@ -221,7 +221,7 @@ public:
     uint8_t noise_flags_get();
 
     // 5.4 Sensor Input Delta Count Registers
-    uint8_t sensor_input_delta_count_get(uint8_t sensor);
+    int8_t sensor_input_delta_count_get(uint8_t sensor);
 
     // 5.5 Sensitivity Control Register
     enum sensitivity_t {
@@ -289,10 +289,38 @@ public:
     // uint8_t recalibration_configuration_get();
 
     // 5.18 Sensor Input Threshold Registers
-    void sensor_input_threshold_set(uint8_t, uint8_t);
-    uint8_t sensor_input_threshold_get(uint8_t);
+    void sensor_input_threshold_set(uint8_t sensor, uint8_t value);
+    uint8_t sensor_input_threshold_get(uint8_t sensor);
 
     // 5.19 Sensor Input Noise Threshold Register
+    enum sensor_input_noise_threshold_t {
+        threshold_25 =   B00000000,
+        threshold_37_5 = B00000001, // default
+        threshold_50 =   B00000010,
+        threshold_62_5 = B00000011,
+    };
+    static const uint8_t sensor_input_noise_threshold_mask = B00000011;
+
+    static sensor_input_noise_threshold_t sensor_input_noise_threshold_convert(
+        uint8_t value
+    );
+    static void sensor_input_noise_threshold_print(
+        Print &out,
+        sensor_input_noise_threshold_t value
+    );
+
+    void sensor_input_noise_threshold_print(
+        Print &out
+    );
+
+    void sensor_input_noise_threshold_set(
+        sensor_input_noise_threshold_t value
+    );
+    void sensor_input_noise_threshold_set(
+        uint8_t value
+    );
+
+    sensor_input_noise_threshold_t sensor_input_noise_threshold_get();
 
     // 5.20 Standby Channel Register
     // 5.21 Standby Configuration Register
@@ -300,6 +328,7 @@ public:
     // 5.23 Standby Threshold Register
 
     // 5.24 Sensor Input Base Count Registers
+    uint8_t sensor_input_base_count_get(uint8_t sensor);
 
     // 5.25 LED Output Type Register
     // '0' = open drain with external pullup (only can drive low & highZ)
@@ -348,10 +377,15 @@ public:
 
     // 5.39 Sensor Input Calibration Registers
     uint16_t sensor_input_calibration_value_get(uint8_t sensor);
-    
+
     // 5.40 Product ID Register
+    uint8_t product_ID_get();
+
     // 5.41 Manufacturer ID Register
+    uint8_t manufacturer_ID_get();
+
     // 5.42 Revision Register
+    uint8_t revision_get();
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // basic read write operations

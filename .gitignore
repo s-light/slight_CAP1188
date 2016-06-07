@@ -1,3 +1,6 @@
+# local only information
+no_git_sync
+
 # Compiled Object files
 *.slo
 *.lo
