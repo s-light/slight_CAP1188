@@ -242,6 +242,32 @@ void slight_CAP1188_TWI::gain_set(gain_setting_t value) {
     write_register(REG_Main_Control, reg);
 }
 
+void slight_CAP1188_TWI::gain_set(uint8_t value) {
+    gain_set(
+        gain_convert(value)
+    );
+}
+
+slight_CAP1188_TWI::gain_setting_t slight_CAP1188_TWI::gain_convert(
+    uint8_t value
+) {
+    gain_setting_t result = gain_1;
+    if (value == 1) {
+        result = gain_1;
+    } else {
+        if (value <= 3) {
+            result = gain_2;
+        } else {
+            if (value < 6) {
+                result = gain_4;
+            } else {
+                result = gain_8;
+            }
+        }
+    }
+    return result;
+}
+
 slight_CAP1188_TWI::gain_setting_t slight_CAP1188_TWI::gain_get() {
     // read Main Control Register
     uint8_t reg = read_register(REG_Main_Control);
@@ -260,16 +286,16 @@ void slight_CAP1188_TWI::gain_print(
 ) {
     switch (value) {
         case gain_1: {
-            out.print(F("gain 1"));
+            out.print(F("1"));
         } break;
         case gain_2: {
-            out.print(F("gain 2"));
+            out.print(F("2"));
         } break;
         case gain_4: {
-            out.print(F("gain 4"));
+            out.print(F("4"));
         } break;
         case gain_8: {
-            out.print(F("gain 8"));
+            out.print(F("8"));
         } break;
     }
 
@@ -336,6 +362,22 @@ uint8_t slight_CAP1188_TWI::noise_flags_get() {
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 5.4 Sensor Input Delta Count Registers
+
+int8_t  slight_CAP1188_TWI::sensor_input_delta_count_get(uint8_t sensor) {
+    if (sensor > 8) {
+        sensor = 8;
+    }
+    if (sensor < 1) {
+        sensor = 1;
+    }
+    sensor = sensor -1;
+    // read register
+    int8_t reg = read_register(REG_Sensor_Input_1_Delta_Count + (sensor));
+    return reg;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 5.5 Sensitivity Control Register
 
 void slight_CAP1188_TWI::sensitivity_set(
@@ -349,6 +391,14 @@ void slight_CAP1188_TWI::sensitivity_set(
     reg = reg | value;
     // write register
     write_register(REG_Sensitivity_Control, reg);
+}
+
+void slight_CAP1188_TWI::sensitivity_set(
+    uint8_t value
+) {
+    sensitivity_set(
+        sensitivity_convert(value)
+    );
 }
 
 slight_CAP1188_TWI::sensitivity_t slight_CAP1188_TWI::sensitivity_get() {
@@ -369,39 +419,37 @@ void slight_CAP1188_TWI::sensitivity_print(
     Print &out,
     slight_CAP1188_TWI::sensitivity_t value
 ) {
-    out.print(F("sensitivity "));
+    // out.print(F("sensitivity "));
     switch (value) {
         case sensitivity_128x: {
-            out.print(F("128x"));
+            out.print(F("128"));
         } break;
         case sensitivity_64x: {
-            out.print(F("64x"));
+            out.print(F("64"));
         } break;
         case sensitivity_32x: {
-            out.print(F("32x"));
+            out.print(F("32"));
         } break;
         case sensitivity_16x: {
-            out.print(F("16x"));
+            out.print(F("16"));
         } break;
         case sensitivity_8x: {
-            out.print(F("8x"));
+            out.print(F("8"));
         } break;
         case sensitivity_4x: {
-            out.print(F("4x"));
+            out.print(F("4"));
         } break;
         case sensitivity_2x: {
-            out.print(F("2x"));
+            out.print(F("2"));
         } break;
         case sensitivity_1x: {
-            out.print(F("1x"));
+            out.print(F("1"));
         } break;
         default: {
-            out.print(F("?x"));
+            out.print(F("?"));
         } break;
     }
-
-    // out.print(F("gain "));
-    // out.print(value >> 6, DEC);
+    out.print(F("x"));
 }
 
 slight_CAP1188_TWI::sensitivity_t slight_CAP1188_TWI::sensitivity_convert(
@@ -435,22 +483,6 @@ slight_CAP1188_TWI::sensitivity_t slight_CAP1188_TWI::sensitivity_convert(
         } break;
     }
     return result;
-}
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 5.4 Sensor Input Delta Count Registers
-
-int8_t  slight_CAP1188_TWI::sensor_input_delta_count_get(uint8_t sensor) {
-    if (sensor > 8) {
-        sensor = 8;
-    }
-    if (sensor < 1) {
-        sensor = 1;
-    }
-    sensor = sensor -1;
-    // read register
-    int8_t reg = read_register(REG_Sensor_Input_1_Delta_Count + (sensor));
-    return reg;
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

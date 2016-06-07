@@ -196,7 +196,7 @@ public:
 
     // Gain Settings
     enum gain_setting_t {
-        gain_1 = B00000000,
+        gain_1 = B00000000,  // default
         gain_2 = B01000000,
         gain_4 = B10000000,
         gain_8 = B11000000,
@@ -204,16 +204,20 @@ public:
     static const uint8_t gain_mask = B11000000;
 
     void gain_set(gain_setting_t value);
+    void gain_set(uint8_t value);
+    static gain_setting_t gain_convert(uint8_t);
     gain_setting_t gain_get();
     void gain_print(Print& out);
     static void gain_print(Print &out, gain_setting_t value);
 
     // 5.2.1 General Status
     uint8_t general_status_get();
+
     // 5.2.2 Sensor Input Status
     uint8_t sensor_input_status_get_raw();
     uint8_t sensor_input_status_get();
     bool sensor_input_status_get(uint8_t sensor);
+
     // 5.2.3 LED Status
     uint8_t led_status_get();
 
@@ -237,8 +241,9 @@ public:
     static const uint8_t sensitivity_mask = B01110000;
 
     void sensitivity_set(sensitivity_t value);
+    void sensitivity_set(uint8_t value);
     sensitivity_t sensitivity_get();
-    sensitivity_t sensitivity_convert(uint8_t value);
+    static sensitivity_t sensitivity_convert(uint8_t value);
     static void sensitivity_print(Print &out, sensitivity_t value);
     void sensitivity_print(Print &out);
 

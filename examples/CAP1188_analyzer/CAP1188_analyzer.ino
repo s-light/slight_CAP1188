@@ -213,10 +213,23 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             out.println(F("ms"));
             // ------------------------------------------
             out.println();
-            out.print(F("\t 's': sensitivity set [1, 2, .., 64, 128] 's128'; "));
-            myTouchSensor.sensitivity_print(out, myTouchSensor.sensitivity_get());
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // 5.1 Main Control Registers - Gain
+            out.print(F("\t 'g': gain set [1..8] 's8'; "));
+            myTouchSensor.gain_print(out);
             out.println();
-            // out.println(F("\t 'S': sensitivity get "));
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // 5.5 Sensitivity Control Register
+            out.print(F("\t 's': sensitivity set [1, 2, .., 64, 128] 's128'; "));
+            myTouchSensor.sensitivity_print(out);
+            out.println();
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // 5.14 Multiple Touch Configuration Register
+            out.print(F("\t 'b': multiple touch blocked enable set 'b1'; "));
+            out.print(
+                myTouchSensor.multiple_touch_blocking_enable_get()
+            );
+            out.println();
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // 5.18 Sensor Input Threshold Registers
             out.print(F("\t 't': threshold set (0..127) 't1:127'; "));
@@ -225,7 +238,6 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
                 out.print(F(" 2:"));
                 out.print(myTouchSensor.sensor_input_threshold_get(2));
             out.println();
-            // out.println(F("\t 'T': threshold get "));
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // 5.19 Sensor Input Noise Threshold Register
             out.print(F("\t 'n': noise threshold set (0..255) 't37'; "));
@@ -234,19 +246,12 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             out.println();
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // 5.24 Sensor Input Base Count Registers
-            out.print(F("\t 'b': multiple touch blocked enable set 'b1'; "));
-            out.print(
-                myTouchSensor.multiple_touch_blocking_enable_get()
-            );
-            out.println();
-            // out.println(F("\t 'B': multiple touch blocked enable get"));
             out.print(F("\t 'a': calibration activate sensor 'a1'; "));
             slight_DebugMenu::print_Binary_8(
                 out,
                 myTouchSensor.calibration_activate_get()
             );
             out.println();
-            // out.println(F("\t 'A': calibration activate get"));
             out.print(F("\t 'e': sensor input enable set sensor'e0:1'; "));
             // out.print(F("\t 'e': sensor input enable set'e255' (3=S1+S2 en); "));
             out.print(F("\t sensor input enabled: "));
@@ -350,23 +355,28 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             out.println();
         } break;
         //---------------------------------------------------------------------
+        case 'g': {
+            out.print(F("\t gain set "));
+            // convert part of string to int
+            // (up to first char that is not a number)
+            uint8_t value = atoi(&command[1]);
+            out.print(value);
+            out.print(F(" --> "));
+            myTouchSensor.gain_set(value);
+            myTouchSensor.gain_print(out);
+            out.println();
+        } break;
         case 's': {
             out.print(F("\t sensitivity set "));
             // convert part of string to int
             // (up to first char that is not a number)
             uint8_t value = atoi(&command[1]);
             out.print(value);
-            out.print(F(" = "));
-            slight_CAP1188_TWI::sensitivity_t sens = myTouchSensor.sensitivity_convert(value);
-            myTouchSensor.sensitivity_set(sens);
-            myTouchSensor.sensitivity_print(Serial, sens);
-            Serial.println();
+            out.print(F(" --> "));
+            myTouchSensor.sensitivity_set(value);
+            myTouchSensor.sensitivity_print(out);
+            out.println();
         } break;
-        // case 'S': {
-        //     out.print(F("\t sensitivity get "));
-        //     myTouchSensor.sensitivity_print(Serial, myTouchSensor.sensitivity_get());
-        //     Serial.println();
-        // } break;
         case 't': {
             out.print(F("\t threshold set "));
             // t0:127
@@ -396,13 +406,6 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             myTouchSensor.multiple_touch_blocking_enable_set(value);
             out.println();
         } break;
-        // case 'B': {
-        //     out.print(F("\t multiple touch blocked enable get "));
-        //     out.print(
-        //         myTouchSensor.multiple_touch_blocking_enable_get()
-        //     );
-        //     out.println();
-        // } break;
         case 'a': {
             out.print(F("\t calibration activate sensor set "));
             // a0
@@ -414,14 +417,6 @@ void handleMenu_Main(slight_DebugMenu *pInstance) {
             myTouchSensor.calibration_activate_sensor(input);
             out.println();
         } break;
-        // case 'A': {
-        //     out.print(F("\t calibration activate sensor get "));
-        //     slight_DebugMenu::print_Binary_8(
-        //         out,
-        //       myTouchSensor.calibration_activate_get()
-        //     );
-        //     out.println();
-        // } break;
         case 'e': {
             out.print(F("\t sensor input enable set sensor "));
             // a0:1
