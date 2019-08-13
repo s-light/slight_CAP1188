@@ -140,7 +140,7 @@ slight_DebugMenu myDebugMenu(Serial, Serial, 15);
 // CAP1188
 
 slight_CAP1188_TWI myTouchSensor(
-    MOSI,  // HW reset pin
+    7,  // HW reset pin
     0x29  // TWI address
 );
 
@@ -152,14 +152,33 @@ slight_CAP1188_TWI myTouchSensor(
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // debug things
 
-// freeRam found at
-// http://forum.arduino.cc/index.php?topic=183790.msg1362282#msg1362282
-// posted by mrburnette
-int freeRam () {
-  extern int __heap_start, *__brkval;
-  int v;
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-}
+
+#if defined(ARDUINO_ARCH_AVR)
+    // freeRam found at
+    // http://forum.arduino.cc/index.php?topic=183790.msg1362282#msg1362282
+    // posted by mrburnette
+    int freeRam () {
+      extern int __heap_start, *__brkval;
+      int v;
+      return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+    }
+#elif defined(ARDUINO_ARCH_SAMD)
+    // freeRam for SAMD
+    // https://forum.arduino.cc/index.php?topic=365830.msg2542879#msg2542879
+    // posted by jsmith
+    extern "C" char *sbrk(int i);
+
+    int freeRam () {
+      char stack_dummy = 0;
+      return &stack_dummy - sbrk(0);
+    }
+#else
+    int freeRam () {
+      return -1;
+    }
+#endif
+
+
 
 
 
@@ -474,23 +493,17 @@ void setup() {
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // initialise serial
 
-        // for ATmega32U4 devices:
-        #if defined (__AVR_ATmega32U4__)
-            // wait for arduino IDE to release all serial ports after upload.
-            delay(2000);
-        #endif
+        // wait for arduino IDE to release all serial ports after upload.
+        delay(1000);
 
         Serial.begin(115200);
 
-        // for ATmega32U4 devices:
-        #if defined (__AVR_ATmega32U4__)
-            // Wait for Serial Connection to be Opend from Host or
-            // timeout after 6second
-            uint32_t timeStamp_Start = millis();
-            while( (! Serial) && ( (millis() - timeStamp_Start) < 6000 ) ) {
-                // nothing to do
-            }
-        #endif
+        // Wait for Serial Connection to be Opend from Host or
+        // timeout after 6second
+        uint32_t timeStamp_Start = millis();
+        while( (! Serial) && ( (millis() - timeStamp_Start) < 6000 ) ) {
+            // nothing to do
+        }
 
         Serial.println();
 
